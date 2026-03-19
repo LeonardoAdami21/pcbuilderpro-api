@@ -1,0 +1,428 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAYMENT_CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  BOLETO
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum ComponentType {
+  CPU
+  MOTHERBOARD
+  RAM
+  GPU
+  STORAGE
+  PSU
+  CASE
+  COOLER
+  FAN
+}
+
+// ─────────────────────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  cpf           String?   @unique
+  phone         String?
+  role          Role      @default(USER)
+  emailVerified Boolean   @default(false)
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  addresses     Address[]
+  orders        Order[]
+  wishlist      Wishlist[]
+  reviews       Review[]
+  refreshTokens RefreshToken[]
+  compareLists  CompareList[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+model Address {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label         String // "Casa", "Trabalho"
+  recipientName String
+  zipCode       String
+  street        String
+  number        String
+  complement    String?
+  neighborhood  String
+  city          String
+  state         String
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  orders Order[]
+
+  @@map("addresses")
+}
+
+// ─────────────────────────────────────────────────────────────
+// CATEGORY
+// ─────────────────────────────────────────────────────────────
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  image       String?
+  icon        String?
+  parentId    String?
+  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryTree")
+  position    Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+// ─────────────────────────────────────────────────────────────
+// PRODUCT
+// ─────────────────────────────────────────────────────────────
+
+model Product {
+  id           String    @id @default(cuid())
+  sku          String    @unique
+  name         String
+  slug         String    @unique
+  description  String?   @db.Text
+  shortDesc    String?
+  price        Decimal   @db.Decimal(10, 2)
+  comparePrice Decimal?  @db.Decimal(10, 2) // preço riscado
+  costPrice    Decimal?  @db.Decimal(10, 2)
+  stock        Int       @default(0)
+  minStock     Int       @default(5) // alerta de estoque baixo
+  weight       Float? // kg
+  brand        String?
+  model        String?
+  warranty     Int? // meses
+  isActive     Boolean   @default(true)
+  isFeatured   Boolean   @default(false)
+  isDigital    Boolean   @default(false)
+  categoryId   String
+  category     Category  @relation(fields: [categoryId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  images          ProductImage[]
+  attributes      ProductAttribute[]
+  priceHistory    PriceHistory[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+  wishlist        Wishlist[]
+  compareItems    CompareItem[]
+  pcBuilderSlots  PcBuilderSlot[]
+  compatibility   ProductCompatibility[] @relation("CompatibleProduct")
+  incompatibility ProductCompatibility[] @relation("IncompatibleProduct")
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([brand])
+  @@index([isActive, isFeatured])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  position  Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  @@map("product_images")
+}
+
+model ProductAttribute {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  key       String // "Frequência", "Socket", "TDP"
+  value     String // "3200 MHz", "AM5", "125W"
+  group     String? // "Memória", "Processador"
+
+  @@map("product_attributes")
+}
+
+// ─────────────────────────────────────────────────────────────
+// PRICE HISTORY — Feature exclusiva! 
+// ─────────────────────────────────────────────────────────────
+
+model PriceHistory {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  price     Decimal  @db.Decimal(10, 2)
+  source    String   @default("system") // "system", "promotion", "manual"
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([productId, createdAt])
+  @@map("price_history")
+}
+
+// ─────────────────────────────────────────────────────────────
+// PRODUCT COMPATIBILITY — Para o PC Builder
+// ─────────────────────────────────────────────────────────────
+
+model ProductCompatibility {
+  id               String  @id @default(cuid())
+  productId        String
+  product          Product @relation("CompatibleProduct", fields: [productId], references: [id], onDelete: Cascade)
+  compatibleWithId String
+  compatibleWith   Product @relation("IncompatibleProduct", fields: [compatibleWithId], references: [id], onDelete: Cascade)
+  isCompatible     Boolean @default(true)
+  reason           String? // "Socket incompatível", "DDR5 requerido"
+
+  @@unique([productId, compatibleWithId])
+  @@map("product_compatibility")
+}
+
+// ─────────────────────────────────────────────────────────────
+// PC BUILDER — Feature exclusiva!
+// ─────────────────────────────────────────────────────────────
+
+model PcBuild {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  totalPrice  Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  slots PcBuilderSlot[]
+
+  @@map("pc_builds")
+}
+
+model PcBuilderSlot {
+  id            String        @id @default(cuid())
+  buildId       String
+  build         PcBuild       @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  componentType ComponentType
+  productId     String?
+  product       Product?      @relation(fields: [productId], references: [id])
+  quantity      Int           @default(1)
+
+  @@map("pc_builder_slots")
+}
+
+// ─────────────────────────────────────────────────────────────
+// COMPARE LIST — Feature exclusiva!
+// ─────────────────────────────────────────────────────────────
+
+model CompareList {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String? // para usuários não logados
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items CompareItem[]
+
+  @@map("compare_lists")
+}
+
+model CompareItem {
+  id            String      @id @default(cuid())
+  compareListId String
+  compareList   CompareList @relation(fields: [compareListId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  addedAt       DateTime    @default(now())
+
+  @@unique([compareListId, productId])
+  @@map("compare_items")
+}
+
+// ─────────────────────────────────────────────────────────────
+// ORDER
+// ─────────────────────────────────────────────────────────────
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  addressId     String
+  address       Address       @relation(fields: [addressId], references: [id])
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+  subtotal      Decimal       @db.Decimal(10, 2)
+  discount      Decimal       @default(0) @db.Decimal(10, 2)
+  shippingCost  Decimal       @default(0) @db.Decimal(10, 2)
+  total         Decimal       @db.Decimal(10, 2)
+  couponCode    String?
+  notes         String?
+  trackingCode  String?
+  paidAt        DateTime?
+  shippedAt     DateTime?
+  deliveredAt   DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items         OrderItem[]
+  statusHistory OrderStatusHistory[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  productName String // snapshot do nome
+  productSku  String // snapshot do sku
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2) // snapshot do preço
+  total       Decimal @db.Decimal(10, 2)
+
+  @@map("order_items")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+
+  @@map("order_status_history")
+}
+
+// ─────────────────────────────────────────────────────────────
+// REVIEW
+// ─────────────────────────────────────────────────────────────
+
+model Review {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating       Int // 1-5
+  title        String?
+  body         String   @db.Text
+  pros         String?
+  cons         String?
+  isVerified   Boolean  @default(false) // comprou o produto
+  isApproved   Boolean  @default(false)
+  helpfulCount Int      @default(0)
+  images       String[] // array de URLs
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([productId, userId])
+  @@index([productId, isApproved])
+  @@map("reviews")
+}
+
+// ─────────────────────────────────────────────────────────────
+// WISHLIST
+// ─────────────────────────────────────────────────────────────
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@map("wishlist")
+}
+
+// ─────────────────────────────────────────────────────────────
+// COUPON
+// ─────────────────────────────────────────────────────────────
+
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  description   String?
+  discountType  String // "PERCENTAGE" | "FIXED"
+  discountValue Decimal   @db.Decimal(10, 2)
+  minOrderValue Decimal?  @db.Decimal(10, 2)
+  maxDiscount   Decimal?  @db.Decimal(10, 2)
+  usageLimit    Int?
+  usedCount     Int       @default(0)
+  isActive      Boolean   @default(true)
+  startsAt      DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@map("coupons")
+}
