@@ -24,6 +24,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Loja virtual de compras e venda de PC')
     .setDescription('API para loja virtual de compras e venda de PC')
+    .addTag('users', 'Gerenciamento de usuários')
     .addServer('http://localhost:7000', 'Development')
     .setVersion('1.0')
     .build();
