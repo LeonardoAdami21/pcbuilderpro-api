@@ -1,11 +1,16 @@
-import { NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/modules/prisma/prisma.service';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAddressDto } from '../dto/create-address.dto';
 import { UpdateAddressDto } from '../dto/update-address.dto';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
 
+@Injectable()
 export class UserRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -42,14 +47,33 @@ export class UserRepository {
   }
 
   async createAddress(userId: string, dto: CreateAddressDto) {
-    // Se isDefault, remove o default anterior
-    if (dto.isDefault) {
-      await this.prisma.address.updateMany({
-        where: { userId, isDefault: true },
-        data: { isDefault: false },
+    try {
+      // Se isDefault, remove o default anterior
+      if (dto.isDefault) {
+        await this.prisma.address.updateMany({
+          where: { userId, isDefault: true },
+          data: { isDefault: false },
+        });
+      }
+      const newAddress = await this.prisma.address.create({
+        data: {
+          city: dto.city,
+          complement: dto.complement,
+          neighborhood: dto.neighborhood,
+          isDefault: dto.isDefault,
+          number: dto.number,
+          label: dto.label,
+          recipientName: dto.recipientName,
+          street: dto.street,
+          zipCode: dto.zipCode,
+          state: dto.state,
+          userId,
+        },
       });
+      return newAddress;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
-    return this.prisma.address.create({ data: { ...dto, userId } });
   }
 
   async updateAddress(
