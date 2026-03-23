@@ -21,7 +21,8 @@ export class UsersService {
   }
 
   async createAddress(userId: string, dto: CreateAddressDto) {
-    return this.userRepository.createAddress(userId, dto);
+    const address = await this.userRepository.createAddress(userId, dto);
+    return address;
   }
 
   async updateAddress(

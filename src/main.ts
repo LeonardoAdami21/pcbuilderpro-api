@@ -26,6 +26,13 @@ async function bootstrap() {
     .setDescription('API para loja virtual de compras e venda de PC')
     .addTag('users', 'Gerenciamento de usuários')
     .addServer('http://localhost:7000', 'Development')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'JWT',
+      description: 'Enter JWT token',
+    })
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
