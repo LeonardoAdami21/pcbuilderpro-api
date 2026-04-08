@@ -33,6 +33,7 @@ export class AuthService {
       data: {
         name: dto.name,
         email: dto.email,
+        cpf: dto.cpf,
         password: hash,
         phone: dto.phone,
       },
