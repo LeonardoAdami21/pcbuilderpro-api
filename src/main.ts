@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-execption.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 dotenv.config();
 
@@ -20,6 +22,12 @@ async function bootstrap() {
     prefix: 'v',
     defaultVersion: '1',
   });
+
+  // ── Filtro global de exceções ─────────────────────────────
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  // ── Interceptor global de resposta ───────────────────────
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   const config = new DocumentBuilder()
     .setTitle('Loja virtual de compras e venda de PC')
