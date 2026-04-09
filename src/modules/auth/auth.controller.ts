@@ -19,11 +19,11 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Public } from 'src/common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/roles.decorator';
 import { RegisterAuthDto } from './dto/register-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 

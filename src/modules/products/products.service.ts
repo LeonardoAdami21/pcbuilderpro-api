@@ -1,16 +1,14 @@
 import {
   Injectable,
-  NotFoundException,
-  ConflictException,
+  NotFoundException
 } from '@nestjs/common';
-import { ProductRepository } from './repository/product.repository';
 import {
   CreateProductDto,
   ProductQueryDto,
   UpdateProductDto,
   UpdateStockDto,
 } from './dto/product.dto';
-import { slugify } from 'src/common/utils/slugify';
+import { ProductRepository } from './repository/product.repository';
 
 @Injectable()
 export class ProductsService {
