@@ -34,7 +34,7 @@ import {
   UpdateStockDto,
 } from './dto/product.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Public, Role, Roles } from 'src/common/decorators/roles.decorator';
+import { Public, Role, Roles } from '../../common/decorators/roles.decorator';
 
 @ApiTags('products')
 @Controller('products')

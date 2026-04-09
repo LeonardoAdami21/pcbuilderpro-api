@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryRepository } from './repository/category.repoitory';
-import { slugify } from 'src/common/utils/slugify';
+import { slugify } from '../../common/utils/slugify';
 
 @Injectable()
 export class CategoriesService {

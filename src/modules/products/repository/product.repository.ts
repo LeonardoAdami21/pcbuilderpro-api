@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { slugify } from 'src/common/utils/slugify';
-import { PrismaService } from 'src/modules/prisma/prisma.service';
+import { slugify } from '../../../common/utils/slugify';
+import { PrismaService } from '../../../modules/prisma/prisma.service';
 import {
   CreateProductDto,
   ProductQueryDto,
@@ -151,7 +151,6 @@ export class ProductRepository {
         _count: { select: { reviews: true, wishlist: true } },
       },
     });
-
 
     // Calcula média de avaliações
     const avgRating = await this.prisma.review.aggregate({
