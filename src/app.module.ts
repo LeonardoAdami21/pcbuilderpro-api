@@ -8,6 +8,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ProductsModule } from './modules/products/products.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { SearchModule } from './modules/search/search.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -18,6 +19,7 @@ import { AdminModule } from './modules/admin/admin.module';
     ProductsModule,
     CategoriesModule,
     AdminModule,
+    SearchModule,
   ],
   providers: [
     {
