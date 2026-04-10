@@ -33,6 +33,8 @@ async function bootstrap() {
     .setTitle('Loja virtual de compras e venda de PC')
     .setDescription('API para loja virtual de compras e venda de PC')
     .addTag('users', 'Gerenciamento de usuários')
+    .addTag('auth', 'Autenticação e autorização de usuários')
+    .addTag('admin', 'Gerenciamento de administradores')
     .addTag('products', 'Gerenciamento de produtos')
     .addTag('categories', 'Gerenciamento de categorias')
     .addServer('http://localhost:7000', 'Development')
