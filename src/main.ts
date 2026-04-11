@@ -37,6 +37,7 @@ async function bootstrap() {
     .addTag('admin', 'Gerenciamento de administradores')
     .addTag('products', 'Gerenciamento de produtos')
     .addTag('categories', 'Gerenciamento de categorias')
+    .addTag('orders', 'Gerenciamento de pedidos')
     .addTag('search', 'Busca de produtos e categorias')
     .addServer('http://localhost:7000', 'Development')
     .addBearerAuth({
