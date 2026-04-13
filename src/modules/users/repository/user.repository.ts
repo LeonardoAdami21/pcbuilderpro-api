@@ -95,6 +95,14 @@ export class UserRepository {
     return this.prisma.address.update({ where: { id: addressId }, data: dto });
   }
 
+  async findOneAddress(userId: string) {
+    const address = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!address) throw new NotFoundException('Usuário nao encontrado');
+    return address;
+  }
+
   async removeAddress(userId: string, addressId: string) {
     const address = await this.prisma.address.findFirst({
       where: { id: addressId, userId },

@@ -35,6 +35,7 @@ async function bootstrap() {
     .addTag('users', 'Gerenciamento de usuários')
     .addTag('auth', 'Autenticação e autorização de usuários')
     .addTag('admin', 'Gerenciamento de administradores')
+    .addTag('compare', 'Comparação de produtos')
     .addTag('products', 'Gerenciamento de produtos')
     .addTag('pc-builder', 'Construção de PC')
     .addTag('price-history', 'Histórico de preços')

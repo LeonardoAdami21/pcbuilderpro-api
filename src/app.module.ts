@@ -12,6 +12,7 @@ import { SearchModule } from './modules/search/search.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PcBuilderModule } from './modules/pc-builder/pc-builder.module';
 import { PriceHistoryModule } from './modules/price-history/price-history.module';
+import { CompareModule } from './modules/compare/compare.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -25,7 +26,8 @@ import { PriceHistoryModule } from './modules/price-history/price-history.module
     SearchModule,
     OrdersModule,
     PcBuilderModule,
-    PriceHistoryModule
+    PriceHistoryModule,
+    CompareModule
   ],
   providers: [
     {
