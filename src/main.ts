@@ -37,6 +37,7 @@ async function bootstrap() {
     .addTag('admin', 'Gerenciamento de administradores')
     .addTag('products', 'Gerenciamento de produtos')
     .addTag('pc-builder', 'Construção de PC')
+    .addTag('price-history', 'Histórico de preços')
     .addTag('categories', 'Gerenciamento de categorias')
     .addTag('orders', 'Gerenciamento de pedidos')
     .addTag('search', 'Busca de produtos e categorias')
