@@ -25,6 +25,10 @@ export class UsersService {
     return address;
   }
 
+  async findOne(userId: string) {
+    return this.userRepository.findOneAddress(userId);
+  }
+
   async updateAddress(
     userId: string,
     addressId: string,
